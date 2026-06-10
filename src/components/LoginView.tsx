@@ -35,10 +35,22 @@ export default function LoginView({ onLoginSuccess }: LoginViewProps) {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
+      let data: any = null;
+      const contentType = res.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        try {
+          data = await res.json();
+        } catch (jsonErr) {
+          throw new Error(`Resposta do servidor corrompida (não-JSON). Código HTTP: ${res.status}`);
+        }
+      } else {
+        const textError = await res.text();
+        const snippet = textError ? textError.slice(0, 150) : 'Resposta sem conteúdo';
+        throw new Error(`Erro de Servidor/Rota no Hostinger (HTTP ${res.status}): ${snippet}`);
+      }
 
       if (!res.ok) {
-        throw new Error(data.error || 'Erro ao realizar login.');
+        throw new Error((data && data.error) || `Erro ao realizar login (Código ${res.status}).`);
       }
 
       onLoginSuccess(data);
