@@ -1,0 +1,6 @@
+{
+  "name": "CastTaskManager",
+  "description": "Um gerenciador de tarefas simples e minimalista estilo Trello e ClickUp, com Kanban, Lista de Tarefas, Agenda e banco de dados MySQL.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
