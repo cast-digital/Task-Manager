@@ -137,12 +137,22 @@ let dbErrorStr: string | null = null;
 
 if (process.env.DB_HOST) {
   try {
+    // Remove aspas se o usuário as colocou no .env ou painel
+    let host = process.env.DB_HOST.replace(/['"]/g, '');
+    if (host === 'localhost') {
+      host = '127.0.0.1';
+    }
+    const port = Number(String(process.env.DB_PORT || 3306).replace(/['"]/g, ''));
+    const user = process.env.DB_USER ? process.env.DB_USER.replace(/['"]/g, '') : '';
+    const password = (process.env.DB_PASS || process.env.DB_PASSWORD || '').replace(/['"]/g, '');
+    const database = process.env.DB_NAME ? process.env.DB_NAME.replace(/['"]/g, '') : '';
+
     dbPool = mysql.createPool({
-      host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT || 3306),
-      user: process.env.DB_USER,
-      password: process.env.DB_PASS || process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
+      host,
+      port,
+      user,
+      password,
+      database,
       waitForConnections: true,
       connectionLimit: 10,
       queueLimit: 0,
@@ -614,10 +624,12 @@ app.delete('/api/users/:id', async (req, res) => {
 
 // Status do Banco de Dados
 app.get('/api/db-status', (req, res) => {
+  const hostVal = process.env.DB_HOST ? process.env.DB_HOST.replace(/['"]/g, '') : 'Não Declarado';
+  const dbVal = process.env.DB_NAME ? process.env.DB_NAME.replace(/['"]/g, '') : 'Não Declarado';
   res.json({
     usingMySQL,
-    host: process.env.DB_HOST || 'Não Declarado',
-    database: process.env.DB_NAME || 'Não Declarado',
+    host: hostVal,
+    database: dbVal,
     connected: usingMySQL,
     error: dbErrorStr
   });
